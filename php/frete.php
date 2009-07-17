@@ -60,9 +60,33 @@ class PgsFrete
         }
     }
 
-    private function _requestFsock($url)
+    private function _requestFsock($url, $post=null)
     {
-
+        $method = $post ? 'GET' : 'POST';
+        $url = parse_url($url);
+        $url->uri = "{$url->scheme}://{$url->host}";
+    /*
+        if ( PHP_VERSION >= 4.3 ) {
+          $fp = @fsockopen('ssl://pagseguro.uol.com.br', 443, $_fsockErrNo, $_fsockErrStr, 30);
+        } else {
+          $fp = @fsockopen($url->host, 80, $_fsockErrNo, $_fsockErrStr, 30);
+        }
+        $cabecalho  = "$method $url->path HTTP/1.0\r\n";
+        if ('POST'===$method) {
+            $cabecalho .= "Content-Type: application/x-www-form-urlencoded\r\n";
+            $cabecalho .= "Content-Length: " . strlen($spost) . "\r\n\r\n";
+        }
+        $resp       = '';
+        fwrite($tipoEnvio[2], "{$cabecalho}{$spost}");
+        while (!feof($tipoEnvio[2])) {
+            $resp = fgets($tipoEnvio[2], 1024);
+            if (strcmp($resp, 'VERIFICADO') == 0) {
+                $confirma = true;
+                break;
+            }
+        }
+        fclose($tipoEnvio[2]);
+    */
     }
 
     private function _requestCurl($url, $post=null)
