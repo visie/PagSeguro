@@ -2,14 +2,15 @@
 
 class PgsFrete
 {
-    private $_use   = 'curl';
-    private $_debug = false;
+    private $_use     = 'curl';
+    private $_debug   = false;
+    private $_methods = array('curl');
     private $_result;
 
     public function PgsFrete()
     {
-        if (!function_exists('curl_init')) {
-            $this->setUse('fsock');
+        if ($this->debug()) {
+            echo "\nPgsFrete started!";
         }
     }
 
@@ -27,8 +28,8 @@ class PgsFrete
             throw new Exception('Method for setUse not allowed.'.
               'Method passed: '.var_export($useMethod, true));
         }
-        
-        if (!in_array($useMethod, array('curl', 'fsock'))) {
+        $useMethod = strtolower($useMethod);
+        if (!in_array($useMethod, $this->_methods)) {
             throw new Exception('Method for setUse not allowed.'.
               'Method passed: '.var_export($useMethod, true));
         }
@@ -45,48 +46,19 @@ class PgsFrete
 
     public function request($url, $post=null)
     {
-        if ('curl'===$this->getUse()) {
-            if ($this->debug()) {
-                echo "\nTrying to get '$url' using CURL";
+        $method = $this->getUse();
+        if (in_array($method, $this->_methods)) {
+            $method_name = '_request'.ucWords($method);
+            if (!method_exists($this, $method_name)) {
+              throw new Exception("Method $method_name does not exists.");
             }
-            return $this->_requestCurl($url, $post);
-        } elseif ('fsock'===$this->getUse()) {
             if ($this->debug()) {
-                echo "\nTrying to get '$url' using FSOCK";
+                echo "\nTrying to get '$url' using ".strtoupper($method);
             }
-            return $this->_requestFsock($url, $post);
+            return call_user_func(array($this, $method_name), $url, $post);
         } else {
             throw new Exception('Method not seted.');
         }
-    }
-
-    private function _requestFsock($url, $post=null)
-    {
-        $method = $post ? 'GET' : 'POST';
-        $url = parse_url($url);
-        $url->uri = "{$url->scheme}://{$url->host}";
-    /*
-        if ( PHP_VERSION >= 4.3 ) {
-          $fp = @fsockopen('ssl://pagseguro.uol.com.br', 443, $_fsockErrNo, $_fsockErrStr, 30);
-        } else {
-          $fp = @fsockopen($url->host, 80, $_fsockErrNo, $_fsockErrStr, 30);
-        }
-        $cabecalho  = "$method $url->path HTTP/1.0\r\n";
-        if ('POST'===$method) {
-            $cabecalho .= "Content-Type: application/x-www-form-urlencoded\r\n";
-            $cabecalho .= "Content-Length: " . strlen($spost) . "\r\n\r\n";
-        }
-        $resp       = '';
-        fwrite($tipoEnvio[2], "{$cabecalho}{$spost}");
-        while (!feof($tipoEnvio[2])) {
-            $resp = fgets($tipoEnvio[2], 1024);
-            if (strcmp($resp, 'VERIFICADO') == 0) {
-                $confirma = true;
-                break;
-            }
-        }
-        fclose($tipoEnvio[2]);
-    */
     }
 
     private function _requestCurl($url, $post=null)

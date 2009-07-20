@@ -8,13 +8,7 @@ class RequisicaoTest extends UnitTestCase
     {
         $frete = new PgsFrete;
         $this->assertTrue($frete instanceof PgsFrete);
-        if (function_exists('curl_init')) {
-          $this->assertEqual('curl', $frete->getUse(), 'Por padrao, usa o CURL. Apenas se o CURL existir este teste eh executado.');
-        } else {
-          $this->assertEqual('fsock', $frete->getUse(), 'Se não tiver CURL, sete para fsock');
-        }
-        $frete->setUse('fsock');
-        $this->assertEqual('fsock', $frete->getUse(), 'Foi setado fsock');
+        $this->assertEqual('curl', $frete->getUse(), 'Por padrao, usa o CURL. Apenas se o CURL existir este teste eh executado.');
         $frete->setUse('curl');
         $this->assertEqual('curl', $frete->getUse(), 'Foi setado o CURL');
         $this->expectException();
@@ -41,12 +35,5 @@ class RequisicaoTest extends UnitTestCase
         $frete->debug(true);
         ob_start(); $frete->request('http://google.com');
         $this->assertEqual("\nTrying to get 'http://google.com' using CURL", ob_get_clean(), 'O Debug funciona para setUse. %s');
-
-        $frete->debug(false);
-        $frete->setUse('fsock');
-        ob_start();
-        $frete->debug(true);
-        $frete->request('http://google.com');
-        $this->assertEqual("\nTrying to get 'http://google.com' using FSOCK", ob_get_clean(), 'O Debug funciona para setUse. %s');
     }
 }
